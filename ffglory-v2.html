@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FF Glory Pro - Free Fire Guild Glory Service</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fire: #ff4500;
+    --fire2: #ff6a00;
+    --gold: #ffd700;
+    --dark: #050a0f;
+    --darker: #020508;
+    --card: #0a1520;
+    --card2: #0e1d2e;
+    --border: #1a3040;
+    --text: #c8dde8;
+    --dim: #5a7a8a;
+    --green: #00e676;
+    --cyan: #00e5ff;
+    --red: #ff1744;
+    --yellow: #ffea00;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--darker);
+    color: var(--text);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(255,69,0,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(0,229,255,0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 100%, rgba(255,165,0,0.03) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+      linear-gradient(rgba(255,69,0,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,69,0,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(5,10,15,0.95);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 4%;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900; font-size: 1.4rem;
+    letter-spacing: 2px;
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+  }
+  .logo span:first-child { color: var(--fire); text-shadow: 0 0 20px var(--fire); }
+  .logo span:last-child { color: var(--gold); }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--fire), var(--fire2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: 0 0 20px rgba(255,69,0,0.4);
+  }
+  .nav-links {
+    display: flex; gap: 28px; list-style: none;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600; font-size: 0.9rem; letter-spacing: 1px;
+  }
+  .nav-links a { color: var(--dim); text-decoration: none; text-transform: uppercase; transition: color 0.2s; cursor: pointer; }
+  .nav-links a:hover, .nav-links a.active { color: var(--fire); }
+  .nav-right { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 0.88rem; letter-spacing: 1.5px;
+    text-transform: uppercase; padding: 9px 20px;
+    border-radius: 6px; cursor: pointer; border: none; transition: all 0.2s;
+  }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--dim); }
+  .btn-ghost:hover { border-color: var(--fire); color: var(--fire); }
+  .btn-fire {
+    background: linear-gradient(135deg, var(--fire), var(--fire2));
+    color: #fff; box-shadow: 0 0 20px rgba(255,69,0,0.3);
+  }
+  .btn-fire:hover { box-shadow: 0 0 30px rgba(255,69,0,0.5); transform: translateY(-1px); }
+  .btn-green { background: linear-gradient(135deg, #00c853, #00e676); color: #000; }
+  .btn-green:hover { box-shadow: 0 0 24px rgba(0,230,118,0.4); transform: translateY(-1px); }
+
+  /* TICKER */
+  .ticker {
+    background: rgba(255,69,0,0.07);
+    border-bottom: 1px solid rgba(255,69,0,0.15);
+    padding: 7px 0; overflow: hidden; position: relative; z-index: 1;
+  }
+  .ticker-inner {
+    display: flex; gap: 60px;
+    animation: ticker 25s linear infinite; white-space: nowrap;
+  }
+  @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  .ticker-item { font-family: 'Rajdhani',sans-serif; font-size: 0.78rem; letter-spacing: 1px; color: var(--fire); flex-shrink: 0; }
+  .ticker-item span { color: var(--gold); }
+
+  .page { position: relative; z-index: 1; }
+
+  /* HERO */
+  .hero { padding: 70px 5% 50px; text-align: center; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,69,0,0.1); border: 1px solid rgba(255,69,0,0.3);
+    border-radius: 100px; padding: 6px 18px;
+    font-family: 'Rajdhani',sans-serif; font-size: 0.78rem; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--fire); margin-bottom: 22px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,69,0,0.4); } 50% { box-shadow: 0 0 0 8px rgba(255,69,0,0); } }
+  .hero h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.8rem); font-weight: 900; line-height: 1.1;
+    margin-bottom: 18px;
+    background: linear-gradient(135deg, #fff 30%, var(--fire) 70%, var(--gold) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero p { font-size: 1.05rem; color: var(--dim); max-width: 580px; margin: 0 auto 36px; line-height: 1.7; }
+  .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn-xl { font-size: 1rem; padding: 14px 32px; border-radius: 8px; letter-spacing: 2px; }
+
+  /* STATS */
+  .stats-bar {
+    background: rgba(10,21,32,0.8);
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    padding: 22px 5%;
+    display: flex; justify-content: center;
+  }
+  .stat-item { flex: 1; max-width: 200px; text-align: center; padding: 0 24px; border-right: 1px solid var(--border); }
+  .stat-item:last-child { border-right: none; }
+  .stat-val { font-family: 'Orbitron',sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--fire); text-shadow: 0 0 20px rgba(255,69,0,0.4); }
+  .stat-val.green { color: var(--green); text-shadow: 0 0 20px rgba(0,230,118,0.3); }
+  .stat-val.cyan { color: var(--cyan); text-shadow: 0 0 20px rgba(0,229,255,0.3); }
+  .stat-label { font-family: 'Rajdhani',sans-serif; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-top: 4px; }
+
+  section { padding: 60px 5%; }
+  .section-tag { font-family: 'Rajdhani',sans-serif; font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: var(--fire); margin-bottom: 8px; }
+  .section-title { font-family: 'Orbitron',sans-serif; font-size: 1.7rem; font-weight: 700; margin-bottom: 6px; color: #fff; }
+  .section-sub { color: var(--dim); margin-bottom: 40px; font-size: 0.95rem; }
+
+  /* FEATURES */
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
+  .feature-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 26px 22px; transition: all 0.3s; position: relative; overflow: hidden;
+  }
+  .feature-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--fire), transparent); opacity: 0; transition: opacity 0.3s;
+  }
+  .feature-card:hover { border-color: rgba(255,69,0,0.3); transform: translateY(-4px); background: var(--card2); }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-icon { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 14px; }
+  .fi-fire { background: rgba(255,69,0,0.15); border: 1px solid rgba(255,69,0,0.2); }
+  .fi-green { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.2); }
+  .fi-cyan { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2); }
+  .fi-gold { background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.2); }
+  .feature-card h3 { font-family: 'Rajdhani',sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #fff; margin-bottom: 8px; }
+  .feature-card p { color: var(--dim); font-size: 0.88rem; line-height: 1.6; }
+
+  /* ===== SERVER GRID ===== */
+  .servers-section { padding: 60px 5%; }
+  .server-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .server-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    transition: all 0.25s;
+    position: relative; overflow: hidden;
+  }
+  .server-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    transition: background 0.2s;
+  }
+  .server-card.online::before { background: var(--green); }
+  .server-card.busy::before { background: var(--yellow); }
+  .server-card.offline::before { background: var(--red); }
+  .server-card:hover { border-color: rgba(255,69,0,0.25); transform: translateY(-2px); }
+
+  .server-left { display: flex; align-items: center; gap: 14px; }
+  .server-num {
+    font-family: 'Orbitron', sans-serif; font-size: 0.75rem; font-weight: 700;
+    color: var(--dim); min-width: 28px;
+  }
+  .server-flag { font-size: 1.4rem; }
+  .server-info {}
+  .server-name { font-family: 'Rajdhani',sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.5px; color: #fff; }
+  .server-region { font-size: 0.78rem; color: var(--dim); margin-top: 2px; }
+
+  .server-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .server-load { text-align: right; }
+  .load-bar-wrap { width: 70px; height: 5px; background: var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 3px; }
+  .load-bar { height: 100%; border-radius: 10px; transition: width 0.5s; }
+  .load-val { font-family: 'Rajdhani',sans-serif; font-size: 0.7rem; letter-spacing: 1px; color: var(--dim); }
+
+  .status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .dot-online { background: var(--green); box-shadow: 0 0 8px var(--green); animation: blink 2s ease-in-out infinite; }
+  .dot-busy { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+  .dot-offline { background: var(--red); }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .server-ping { font-family: 'Orbitron',sans-serif; font-size: 0.72rem; color: var(--dim); }
+  .ping-low { color: var(--green); }
+  .ping-mid { color: var(--yellow); }
+
+  /* SERVER FILTER */
+  .filter-bar {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; align-items: center;
+  }
+  .filter-btn {
+    font-family: 'Rajdhani',sans-serif; font-size: 0.78rem; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 7px 16px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border);
+    background: transparent; color: var(--dim); transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--fire); color: var(--fire); background: rgba(255,69,0,0.08); }
+  .filter-btn.green-active { border-color: var(--green); color: var(--green); background: rgba(0,230,118,0.08); }
+
+  .server-count {
+    margin-left: auto; font-family: 'Rajdhani',sans-serif; font-size: 0.8rem;
+    letter-spacing: 1px; color: var(--dim);
+  }
+  .server-count span { color: var(--green); font-weight: 700; }
+
+  /* REGIONS */
+  .regions-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  .region-chip {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 20px; font-family: 'Rajdhani',sans-serif; font-size: 0.88rem;
+    font-weight: 600; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;
+    transition: all 0.2s; cursor: default;
+  }
+  .region-chip:hover { border-color: var(--fire); color: var(--fire); background: rgba(255,69,0,0.05); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
+    z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    width: 100%; max-width: 420px; overflow: hidden; animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-header {
+    background: rgba(255,69,0,0.08); border-bottom: 1px solid var(--border);
+    padding: 18px 22px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-title { font-family: 'Orbitron',sans-serif; font-size: 0.95rem; font-weight: 700; color: #fff; }
+  .close-btn { background: none; border: none; color: var(--dim); font-size: 1.4rem; cursor: pointer; line-height: 1; }
+  .close-btn:hover { color: var(--fire); }
+  .modal-body { padding: 26px 22px; }
+  .tabs { display: flex; gap: 4px; background: var(--darker); border-radius: 8px; padding: 4px; margin-bottom: 22px; }
+  .tab { flex: 1; padding: 8px; background: none; border: none; border-radius: 6px; font-family: 'Rajdhani',sans-serif; font-weight: 700; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; color: var(--dim); cursor: pointer; transition: all 0.2s; }
+  .tab.active { background: var(--card2); color: var(--fire); border: 1px solid rgba(255,69,0,0.2); }
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-family: 'Rajdhani',sans-serif; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 7px; display: block; }
+  .form-input { width: 100%; background: var(--darker); border: 1px solid var(--border); border-radius: 8px; padding: 11px 13px; color: #fff; font-family: 'Exo 2',sans-serif; font-size: 0.92rem; outline: none; transition: border-color 0.2s; }
+  .form-input:focus { border-color: var(--fire); }
+  .form-input::placeholder { color: var(--dim); opacity: 0.5; }
+  .form-select { width: 100%; background: var(--darker); border: 1px solid var(--border); border-radius: 8px; padding: 11px 13px; color: #fff; font-family: 'Exo 2',sans-serif; font-size: 0.92rem; outline: none; cursor: pointer; appearance: none; }
+  .btn-block { width: 100%; padding: 13px; font-size: 0.95rem; border-radius: 8px; }
+  .form-footer { text-align: center; margin-top: 14px; font-size: 0.84rem; color: var(--dim); }
+  .form-footer a { color: var(--fire); cursor: pointer; }
+
+  /* DASHBOARD */
+  #dashboardPage { display: none; padding: 28px 4%; }
+  .dash-welcome { font-family: 'Orbitron',sans-serif; font-size: 1.3rem; color: #fff; margin-bottom: 4px; }
+  .dash-welcome span { color: var(--fire); }
+
+  .dash-quick-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 14px; margin: 20px 0 24px;
+  }
+  .qs-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .qs-label { font-family: 'Rajdhani',sans-serif; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+  .qs-val { font-family: 'Orbitron',sans-serif; font-size: 1.5rem; font-weight: 700; }
+
+  .bot-panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px; margin-bottom: 20px; }
+  .panel-title { font-family: 'Rajdhani',sans-serif; font-size: 0.78rem; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); margin-bottom: 18px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* ACTIVE BOTS */
+  .bot-list { display: flex; flex-direction: column; gap: 10px; }
+  .bot-row {
+    background: var(--darker); border: 1px solid var(--border); border-radius: 8px;
+    padding: 13px 16px; display: flex; align-items: center; justify-content: space-between;
+    font-family: 'Rajdhani',sans-serif; font-size: 0.88rem; letter-spacing: 0.5px;
+  }
+  .bot-info { display: flex; align-items: center; gap: 12px; }
+  .bot-avatar { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, var(--fire), #ff8c00); display: flex; align-items: center; justify-content: center; font-size: 0.95rem; }
+  .bot-name { font-weight: 700; color: #fff; }
+  .bot-server { color: var(--dim); font-size: 0.75rem; }
+  .badge { padding: 3px 10px; border-radius: 100px; font-size: 0.7rem; font-family: 'Rajdhani',sans-serif; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
+  .badge-green { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+  .badge-yellow { background: rgba(255,234,0,0.12); color: var(--yellow); border: 1px solid rgba(255,234,0,0.25); }
+  .badge-dim { background: rgba(90,122,138,0.12); color: var(--dim); border: 1px solid var(--border); }
+  .bot-glory { color: var(--fire); font-weight: 700; }
+
+  /* SESSION LOG */
+  .log { background: var(--darker); border: 1px solid var(--border); border-radius: 8px; padding: 14px; height: 150px; overflow-y: auto; font-family: 'Exo 2', monospace; font-size: 0.78rem; line-height: 1.9; }
+  .log-line { display: flex; gap: 10px; }
+  .log-time { color: var(--dim); min-width: 62px; }
+  .log-green { color: var(--green); }
+  .log-fire { color: var(--fire); }
+  .log-cyan { color: var(--cyan); }
+  .log-dim { color: var(--dim); }
+
+  /* FOOTER */
+  footer { background: var(--card); border-top: 1px solid var(--border); padding: 36px 5% 20px; }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 36px; margin-bottom: 28px; }
+  .footer-brand p { color: var(--dim); font-size: 0.86rem; line-height: 1.7; margin-top: 10px; }
+  .footer-col h4 { font-family: 'Rajdhani',sans-serif; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 12px; }
+  .footer-col a { display: block; color: var(--text); text-decoration: none; font-size: 0.88rem; margin-bottom: 7px; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--fire); }
+  .footer-bottom { border-top: 1px solid var(--border); padding-top: 18px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--dim); flex-wrap: wrap; gap: 10px; }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .stat-item { min-width: 50%; border-right: none; border-bottom: 1px solid var(--border); }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ticker-item">🔥 21 SERVERS ONLINE &nbsp;|&nbsp; <span>ALL REGIONS ACTIVE</span></span>
+    <span class="ticker-item">⚡ BOT SESSION COMPLETED &nbsp;|&nbsp; <span>+380 GLORY</span> EARNED</span>
+    <span class="ticker-item">🌏 INDIA · PAKISTAN · BANGLADESH · NEPAL · SRI LANKA · DUBAI · SINGAPORE · MALAYSIA · INDONESIA · THAILAND</span>
+    <span class="ticker-item">🌍 VIETNAM · JAPAN · KOREA · CHINA · TURKEY · RUSSIA · GERMANY · FRANCE · BRAZIL · USA · AUSTRALIA</span>
+    <span class="ticker-item">🔥 21 SERVERS ONLINE &nbsp;|&nbsp; <span>ALL REGIONS ACTIVE</span></span>
+    <span class="ticker-item">⚡ BOT SESSION COMPLETED &nbsp;|&nbsp; <span>+380 GLORY</span> EARNED</span>
+    <span class="ticker-item">🌏 INDIA · PAKISTAN · BANGLADESH · NEPAL · SRI LANKA · DUBAI · SINGAPORE · MALAYSIA · INDONESIA · THAILAND</span>
+    <span class="ticker-item">🌍 VIETNAM · JAPAN · KOREA · CHINA · TURKEY · RUSSIA · GERMANY · FRANCE · BRAZIL · USA · AUSTRALIA</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="showHome()" style="cursor:pointer;">
+    <div class="logo-icon">🔥</div>
+    <span>FF</span><span>GLORY</span>
+  </div>
+  <ul class="nav-links">
+    <li><a class="active" onclick="showHome()">Home</a></li>
+    <li><a onclick="scrollTo('features')">Features</a></li>
+    <li><a onclick="scrollTo('servers')">Servers</a></li>
+    <li><a onclick="scrollTo('regions')">Regions</a></li>
+  </ul>
+  <div class="nav-right" id="navRight">
+    <button class="btn btn-ghost" onclick="openModal('login')">Login</button>
+    <button class="btn btn-fire" onclick="openModal('register')">Get Started</button>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div class="page" id="homePage">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">
+      <div class="status-dot dot-online"></div>
+      21 Servers Live — Worldwide Coverage
+    </div>
+    <h1>Boost Your Guild<br>Glory Automatically</h1>
+    <p>The most advanced Free Fire guild glory automation system. 21 dedicated servers across India, Pakistan, Bangladesh, Dubai, Singapore, Japan, USA, Australia & more — running 24/7 worldwide.</p>
+    <div class="hero-cta">
+      <button class="btn btn-fire btn-xl" onclick="openModal('register')">🚀 Start Now — Free</button>
+      <button class="btn btn-ghost btn-xl" onclick="scrollTo('servers')">📡 View Servers</button>
+    </div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-val" id="s1">12,450+</div>
+      <div class="stat-label">Active Users</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val green">21</div>
+      <div class="stat-label">Live Servers</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val cyan">98.7%</div>
+      <div class="stat-label">Uptime</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val" id="s4">5M+</div>
+      <div class="stat-label">Glory Earned</div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="section-tag">Why Choose Us</div>
+    <div class="section-title">Powerful Features</div>
+    <div class="section-sub">Everything you need to dominate the Guild Glory leaderboards</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon fi-fire">🤖</div>
+        <h3>20 Dedicated Servers</h3>
+        <p>20 high-performance servers spread across 4 regions ensure lightning-fast bot execution and zero downtime for your glory sessions.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-cyan">📊</div>
+        <h3>Real-Time Dashboard</h3>
+        <p>Monitor server status, bot activity, glory earned, and session logs all in one live dashboard with instant updates.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-green">🛡️</div>
+        <h3>Secure & Encrypted</h3>
+        <p>Advanced security measures with encrypted connections and secure authentication keep your account safe at all times.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-gold">⚡</div>
+        <h3>Auto Server Selection</h3>
+        <p>Smart auto-routing picks the fastest available server in your region automatically for the best performance every time.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-fire">🌏</div>
+        <h3>Multi-Region Coverage</h3>
+        <p>21 servers worldwide — India, Pakistan, Bangladesh, Dubai, Singapore, Japan, USA, Australia & more. Local routing for ultra-low ping everywhere.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-cyan">🔄</div>
+        <h3>Auto Failover</h3>
+        <p>If one server goes down, your session instantly switches to the next available server — no manual intervention needed.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVERS SECTION -->
+  <section id="servers" style="background:rgba(10,21,32,0.4);">
+    <div class="section-tag">Infrastructure</div>
+    <div class="section-title">20 Live Servers</div>
+    <div class="section-sub">All servers monitored 24/7 — pick any server or use auto-select</div>
+
+    <div class="filter-bar">
+      <button class="filter-btn green-active active" onclick="filterServers('all',this)">All (21)</button>
+      <button class="filter-btn" onclick="filterServers('india',this)">🇮🇳 India</button>
+      <button class="filter-btn" onclick="filterServers('pak',this)">🇵🇰 Pakistan</button>
+      <button class="filter-btn" onclick="filterServers('ban',this)">🇧🇩 Bangladesh</button>
+      <button class="filter-btn" onclick="filterServers('sgp',this)">🇸🇬 Singapore</button>
+      <button class="filter-btn" onclick="filterServers('aus',this)">🇦🇺 Australia</button>
+      <button class="filter-btn" onclick="filterServers('usa',this)">🇺🇸 USA</button>
+      <span class="server-count">Online: <span id="onlineCount">20</span>/21</span>
+    </div>
+
+    <div class="server-grid" id="serverGrid"></div>
+  </section>
+
+  <!-- REGIONS -->
+  <section id="regions">
+    <div style="text-align:center;">
+      <div class="section-tag">Coverage</div>
+      <div class="section-title">Supported Regions</div>
+      <div class="section-sub">Full coverage across South Asia, Middle East & South East Asia</div>
+    </div>
+    <div class="regions-grid">
+      <div class="region-chip">🇮🇳 India</div>
+      <div class="region-chip">🇵🇰 Pakistan</div>
+      <div class="region-chip">🇧🇩 Bangladesh</div>
+      <div class="region-chip">🇳🇵 Nepal</div>
+      <div class="region-chip">🇱🇰 Sri Lanka</div>
+      <div class="region-chip">🇦🇪 Dubai</div>
+      <div class="region-chip">🇸🇬 Singapore</div>
+      <div class="region-chip">🇲🇾 Malaysia</div>
+      <div class="region-chip">🇮🇩 Indonesia</div>
+      <div class="region-chip">🇹🇭 Thailand</div>
+      <div class="region-chip">🇻🇳 Vietnam</div>
+      <div class="region-chip">🇯🇵 Japan</div>
+      <div class="region-chip">🇰🇷 Korea</div>
+      <div class="region-chip">🇨🇳 China</div>
+      <div class="region-chip">🇹🇷 Turkey</div>
+      <div class="region-chip">🇷🇺 Russia</div>
+      <div class="region-chip">🇩🇪 Germany</div>
+      <div class="region-chip">🇫🇷 France</div>
+      <div class="region-chip">🇧🇷 Brazil</div>
+      <div class="region-chip">🇺🇸 USA</div>
+      <div class="region-chip">🇦🇺 Australia</div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" style="font-size:1.1rem;margin-bottom:0;cursor:pointer;" onclick="showHome()">
+          <div class="logo-icon" style="width:28px;height:28px;font-size:0.85rem;">🔥</div>
+          <span>FF</span><span>GLORY</span>
+        </div>
+        <p>The most advanced Free Fire Guild Glory automation system with 20 dedicated servers. Trusted by 12,000+ players worldwide.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a>Dashboard</a><a>Servers</a><a>API</a>
+      </div>
+      <div class="footer-col">
+        <h4>Regions</h4>
+        <a>India</a><a>Bangladesh</a><a>Middle East</a><a>SEA</a>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <a>Telegram</a><a>Discord</a><a>FAQ</a><a>Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 FFGlory Pro. All rights reserved.</span>
+      <span>Terms · Privacy · Support</span>
+    </div>
+  </footer>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div id="dashboardPage">
+  <div class="dash-welcome">Welcome back, <span id="welcomeName">Player</span> 👋</div>
+  <p style="color:var(--dim);font-size:0.88rem;margin-top:4px;">Select a server and start your glory bot session</p>
+
+  <div class="dash-quick-stats">
+    <div class="qs-card">
+      <div class="qs-label">Glory Today</div>
+      <div class="qs-val" style="color:var(--fire);" id="dGlory">0</div>
+    </div>
+    <div class="qs-card">
+      <div class="qs-label">Sessions Done</div>
+      <div class="qs-val" style="color:var(--cyan);" id="dSessions">0</div>
+    </div>
+    <div class="qs-card">
+      <div class="qs-label">Active Bots</div>
+      <div class="qs-val" style="color:var(--green);" id="dBots">0</div>
+    </div>
+    <div class="qs-card">
+      <div class="qs-label">Servers Online</div>
+      <div class="qs-val" style="color:var(--gold);">20/21</div>
+    </div>
+  </div>
+
+  <!-- START SESSION -->
+  <div class="bot-panel">
+    <div class="panel-title">🚀 Start New Glory Session</div>
+    <div class="form-row" style="margin-bottom:14px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Guild ID</label>
+        <input type="text" class="form-input" id="dGuildId" placeholder="Enter your Guild ID">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Select Server</label>
+        <select class="form-select form-input" id="dServerSelect"></select>
+      </div>
+    </div>
+    <div class="form-row" style="margin-bottom:18px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Number of Sessions</label>
+        <input type="number" class="form-input" id="dSessions2" value="10" min="1" max="200">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Bot Speed</label>
+        <select class="form-select form-input">
+          <option>⚡ Fast</option>
+          <option>🔥 Normal</option>
+          <option>🐢 Safe</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-fire" style="width:100%;padding:13px;font-size:0.95rem;border-radius:8px;letter-spacing:2px;" onclick="startBot()">🤖 LAUNCH GLORY BOT</button>
+  </div>
+
+  <!-- SESSION LOG -->
+  <div class="bot-panel">
+    <div class="panel-title">📋 Live Session Log</div>
+    <div class="log" id="sessionLog">
+      <div class="log-line"><span class="log-time">--:--:--</span><span class="log-dim">Waiting for session to start...</span></div>
+    </div>
+  </div>
+
+  <!-- ACTIVE BOTS -->
+  <div class="bot-panel">
+    <div class="panel-title">🤖 Active Bots</div>
+    <div class="bot-list" id="activeBots">
+      <div style="color:var(--dim);font-size:0.85rem;text-align:center;padding:16px;">No active bots. Launch a session above.</div>
+    </div>
+  </div>
+
+  <!-- SERVER STATUS IN DASH -->
+  <div class="bot-panel">
+    <div class="panel-title">📡 Server Status</div>
+    <div class="server-grid" id="dashServerGrid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));"></div>
+  </div>
+
+  <div style="text-align:center;margin-top:20px;padding-bottom:32px;">
+    <button class="btn btn-ghost" onclick="logout()">← Back to Home</button>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">LOGIN</div>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs">
+        <button class="tab active" id="tabLogin" onclick="switchTab('login')">Login</button>
+        <button class="tab" id="tabRegister" onclick="switchTab('register')">Register</button>
+      </div>
+      <!-- LOGIN -->
+      <div id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-input" id="loginUser" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="loginPass" placeholder="Enter password">
+        </div>
+        <button class="btn btn-fire btn-block" onclick="doLogin()">🚀 Login</button>
+        <div class="form-footer">Don't have an account? <a onclick="switchTab('register')">Register</a></div>
+      </div>
+      <!-- REGISTER -->
+      <div id="registerForm" style="display:none;">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-input" id="regUser" placeholder="Choose username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="regEmail" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="regPass" placeholder="Create password">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Region</label>
+          <select class="form-select form-input">
+            <option>🇮🇳 India</option><option>🇵🇰 Pakistan</option><option>🇧🇩 Bangladesh</option><option>🇳🇵 Nepal</option><option>🇱🇰 Sri Lanka</option><option>🇦🇪 Dubai</option><option>🇸🇬 Singapore</option><option>🇲🇾 Malaysia</option><option>🇮🇩 Indonesia</option><option>🇹🇭 Thailand</option><option>🇻🇳 Vietnam</option><option>🇯🇵 Japan</option><option>🇰🇷 Korea</option><option>🇨🇳 China</option><option>🇹🇷 Turkey</option><option>🇷🇺 Russia</option><option>🇩🇪 Germany</option><option>🇫🇷 France</option><option>🇧🇷 Brazil</option><option>🇺🇸 USA</option><option>🇦🇺 Australia</option>
+          </select>
+        </div>
+        <button class="btn btn-green btn-block" onclick="doRegister()">✅ Create Free Account</button>
+        <div class="form-footer">Already have an account? <a onclick="switchTab('login')">Login</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== SERVER DATA (20 servers) =====
+const SERVERS = [
+  { id:'IND-01',  name:'India Server',      region:'india',  flag:'🇮🇳', location:'Mumbai',     status:'online',  load:42, ping:18  },
+  { id:'PAK-01',  name:'Pakistan Server',   region:'pak',    flag:'🇵🇰', location:'Karachi',    status:'online',  load:50, ping:32  },
+  { id:'BAN-01',  name:'Bangladesh Server', region:'ban',    flag:'🇧🇩', location:'Dhaka',      status:'online',  load:44, ping:26  },
+  { id:'NPL-01',  name:'Nepal Server',      region:'nepal',  flag:'🇳🇵', location:'Kathmandu',  status:'online',  load:30, ping:28  },
+  { id:'LKA-01',  name:'Sri Lanka Server',  region:'lka',    flag:'🇱🇰', location:'Colombo',    status:'online',  load:38, ping:35  },
+  { id:'DUB-01',  name:'Dubai Server',      region:'dubai',  flag:'🇦🇪', location:'Dubai',      status:'online',  load:60, ping:38  },
+  { id:'SGP-01',  name:'Singapore Server',  region:'sgp',    flag:'🇸🇬', location:'Singapore',  status:'online',  load:28, ping:14  },
+  { id:'MYS-01',  name:'Malaysia Server',   region:'mys',    flag:'🇲🇾', location:'Kuala Lumpur',status:'online', load:45, ping:22  },
+  { id:'IDN-01',  name:'Indonesia Server',  region:'idn',    flag:'🇮🇩', location:'Jakarta',    status:'online',  load:55, ping:28  },
+  { id:'THA-01',  name:'Thailand Server',   region:'tha',    flag:'🇹🇭', location:'Bangkok',    status:'online',  load:40, ping:25  },
+  { id:'VNM-01',  name:'Vietnam Server',    region:'vnm',    flag:'🇻🇳', location:'Ho Chi Minh',status:'online',  load:35, ping:30  },
+  { id:'JPN-01',  name:'Japan Server',      region:'jpn',    flag:'🇯🇵', location:'Tokyo',      status:'online',  load:33, ping:12  },
+  { id:'KOR-01',  name:'Korea Server',      region:'kor',    flag:'🇰🇷', location:'Seoul',      status:'online',  load:48, ping:15  },
+  { id:'CHN-01',  name:'China Server',      region:'chn',    flag:'🇨🇳', location:'Shanghai',   status:'busy',    load:85, ping:20  },
+  { id:'TUR-01',  name:'Turkey Server',     region:'tur',    flag:'🇹🇷', location:'Istanbul',   status:'online',  load:52, ping:42  },
+  { id:'RUS-01',  name:'Russia Server',     region:'rus',    flag:'🇷🇺', location:'Moscow',     status:'online',  load:47, ping:55  },
+  { id:'DEU-01',  name:'Germany Server',    region:'deu',    flag:'🇩🇪', location:'Frankfurt',  status:'online',  load:36, ping:62  },
+  { id:'FRA-01',  name:'France Server',     region:'fra',    flag:'🇫🇷', location:'Paris',      status:'online',  load:41, ping:65  },
+  { id:'BRA-01',  name:'Brazil Server',     region:'bra',    flag:'🇧🇷', location:'São Paulo',  status:'online',  load:58, ping:110 },
+  { id:'USA-01',  name:'USA Server',        region:'usa',    flag:'🇺🇸', location:'New York',   status:'online',  load:62, ping:130 },
+  { id:'AUS-01',  name:'Australia Server',  region:'aus',    flag:'🇦🇺', location:'Sydney',     status:'online',  load:29, ping:95  },
+];
+
+function loadColor(pct) {
+  if (pct >= 80) return '#ff4500';
+  if (pct >= 60) return '#ffea00';
+  return '#00e676';
+}
+
+function pingClass(p) {
+  if (!p) return '';
+  if (p <= 25) return 'ping-low';
+  if (p <= 40) return 'ping-mid';
+  return '';
+}
+
+function renderServerCard(s) {
+  const loadPct = s.load;
+  const lc = loadColor(loadPct);
+  const dotCls = s.status === 'online' ? 'dot-online' : s.status === 'busy' ? 'dot-busy' : 'dot-offline';
+  const pingStr = s.ping ? `${s.ping}ms` : '—';
+  const pCls = pingClass(s.ping);
+  return `
+    <div class="server-card ${s.status}" data-region="${s.region}">
+      <div class="server-left">
+        <div class="server-num">${s.id}</div>
+        <div class="server-flag">${s.flag}</div>
+        <div class="server-info">
+          <div class="server-name">${s.name.replace(s.id+' ','')}</div>
+          <div class="server-region">${s.location}</div>
+        </div>
+      </div>
+      <div class="server-right">
+        <div class="server-load">
+          <div class="load-bar-wrap"><div class="load-bar" style="width:${loadPct}%;background:${lc};"></div></div>
+          <div class="load-val">${loadPct > 0 ? loadPct+'% load' : 'offline'}</div>
+        </div>
+        <div class="server-ping ${pCls}">${pingStr}</div>
+        <div class="status-dot ${dotCls}"></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderServers(filter, containerId) {
+  const grid = document.getElementById(containerId);
+  if (!grid) return;
+  const list = filter === 'all' ? SERVERS : SERVERS.filter(s => s.region === filter);
+  grid.innerHTML = list.map(renderServerCard).join('');
+}
+
+function filterServers(f, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => { b.classList.remove('active','green-active'); });
+  btn.classList.add('active','green-active');
+  renderServers(f, 'serverGrid');
+}
+
+function populateServerSelect() {
+  const sel = document.getElementById('dServerSelect');
+  if (!sel) return;
+  sel.innerHTML = '<option value="auto">⚡ Auto (Best Available)</option>' +
+    SERVERS.filter(s => s.status !== 'offline')
+      .map(s => `<option value="${s.id}">${s.flag} ${s.id} — ${s.location} (${s.ping}ms)</option>`)
+      .join('');
+}
+
+// Init
+renderServers('all', 'serverGrid');
+
+// AUTH
+function openModal(tab) { document.getElementById('authModal').classList.add('show'); switchTab(tab); }
+function closeModal() { document.getElementById('authModal').classList.remove('show'); }
+function switchTab(t) {
+  document.getElementById('loginForm').style.display = t==='login'?'block':'none';
+  document.getElementById('registerForm').style.display = t==='register'?'block':'none';
+  document.getElementById('tabLogin').className = 'tab'+(t==='login'?' active':'');
+  document.getElementById('tabRegister').className = 'tab'+(t==='register'?' active':'');
+  document.getElementById('modalTitle').textContent = t.toUpperCase();
+}
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  if (!u) { alert('Enter username!'); return; }
+  closeModal(); showDashboard(u);
+}
+function doRegister() {
+  const u = document.getElementById('regUser').value.trim();
+  const e = document.getElementById('regEmail').value.trim();
+  if (!u || !e) { alert('Fill all fields!'); return; }
+  closeModal(); showDashboard(u);
+}
+function showDashboard(name) {
+  document.getElementById('homePage').style.display = 'none';
+  document.getElementById('dashboardPage').style.display = 'block';
+  document.getElementById('welcomeName').textContent = name;
+  document.getElementById('navRight').innerHTML = `
+    <span style="font-family:'Rajdhani',sans-serif;font-size:0.8rem;letter-spacing:1px;color:var(--green);">
+      <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);margin-right:6px;"></span>
+      ${name}
+    </span>
+    <button class="btn btn-ghost" onclick="logout()">Logout</button>
+  `;
+  populateServerSelect();
+  renderServers('all', 'dashServerGrid');
+}
+function showHome() {
+  document.getElementById('homePage').style.display = 'block';
+  document.getElementById('dashboardPage').style.display = 'none';
+}
+function logout() {
+  showHome();
+  document.getElementById('navRight').innerHTML = `
+    <button class="btn btn-ghost" onclick="openModal('login')">Login</button>
+    <button class="btn btn-fire" onclick="openModal('register')">Get Started</button>
+  `;
+}
+function scrollTo(id) { document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
+document.getElementById('authModal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+
+// BOT ENGINE
+let gloryToday=0, totalSessions=0, activeBotCount=0;
+
+function startBot() {
+  const guildId = document.getElementById('dGuildId').value.trim();
+  const sessions = parseInt(document.getElementById('dSessions2').value)||10;
+  const serverVal = document.getElementById('dServerSelect').value;
+
+  if (!guildId) { alert('Enter Guild ID!'); return; }
+
+  let chosenServer;
+  if (serverVal === 'auto') {
+    const online = SERVERS.filter(s=>s.status==='online');
+    chosenServer = online.sort((a,b)=>a.ping-b.ping)[0];
+  } else {
+    chosenServer = SERVERS.find(s=>s.id===serverVal);
+  }
+
+  activeBotCount++;
+  document.getElementById('dBots').textContent = activeBotCount;
+
+  const log = document.getElementById('sessionLog');
+  log.innerHTML = '';
+
+  const botId = 'BOT_' + Math.random().toString(36).substr(2,5).toUpperCase();
+  document.getElementById('activeBots').innerHTML = `
+    <div class="bot-row" id="botRow_${botId}">
+      <div class="bot-info">
+        <div class="bot-avatar">🤖</div>
+        <div>
+          <div class="bot-name">${botId}</div>
+          <div class="bot-server">${chosenServer.flag} ${chosenServer.id} · ${chosenServer.location}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;align-items:center;">
+        <span class="bot-glory" id="bg_${botId}">+0 Glory</span>
+        <span class="badge badge-green" id="bs_${botId}">Running</span>
+      </div>
+    </div>
+  `;
+
+  function addLog(msg, cls) {
+    const t = new Date().toTimeString().substr(0,8);
+    const d = document.createElement('div');
+    d.className = 'log-line';
+    d.innerHTML = `<span class="log-time">${t}</span><span class="${cls}">${msg}</span>`;
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  addLog(`[INIT] Guild: ${guildId} | Server: ${chosenServer.id} (${chosenServer.location}) | Ping: ${chosenServer.ping}ms`, 'log-cyan');
+  addLog(`[START] Launching ${sessions} glory sessions...`, 'log-fire');
+
+  let done=0, glory=0;
+  const iv = setInterval(()=>{
+    if (done >= sessions) {
+      clearInterval(iv);
+      activeBotCount = Math.max(0, activeBotCount-1);
+      document.getElementById('dBots').textContent = activeBotCount;
+      const bs = document.getElementById(`bs_${botId}`);
+      if (bs) { bs.textContent = 'Done'; bs.className = 'badge badge-dim'; }
+      addLog(`[DONE] ✅ All ${sessions} sessions complete! Total Glory: +${glory}`, 'log-green');
+      return;
+    }
+    const earned = Math.floor(Math.random()*35)+20;
+    const ok = Math.random() > 0.04;
+    done++;
+    if (ok) {
+      glory += earned; gloryToday += earned; totalSessions++;
+      document.getElementById('dGlory').textContent = gloryToday;
+      document.getElementById('dSessions').textContent = totalSessions;
+      const bg = document.getElementById(`bg_${botId}`);
+      if (bg) bg.textContent = `+${glory} Glory`;
+      addLog(`[${done}/${sessions}] Session OK → +${earned} Glory | Server: ${chosenServer.id}`, 'log-green');
+    } else {
+      addLog(`[${done}/${sessions}] Session failed — auto retry on ${SERVERS.filter(s=>s.status==='online'&&s.id!==chosenServer.id)[0]?.id||chosenServer.id}`, 'log-fire');
+    }
+  }, 700);
+}
+
+// Animate stats
+setTimeout(()=>{
+  let s=0; const t=setInterval(()=>{ s+=210; if(s>=12450){clearInterval(t); document.getElementById('s1').textContent='12,450+'; return;} document.getElementById('s1').textContent=s.toLocaleString()+'+'; },16);
+  let g=0; const t2=setInterval(()=>{ g+=90000; if(g>=5000000){clearInterval(t2); document.getElementById('s4').textContent='5M+'; return;} document.getElementById('s4').textContent=(g/1000000).toFixed(1)+'M+'; },16);
+}, 400);
+
+// Live load flicker
+setInterval(()=>{
+  SERVERS.forEach(s=>{
+    if(s.status==='online') s.load = Math.max(10, Math.min(85, s.load + (Math.random()*10-5)|0));
+  });
+  const cards = document.querySelectorAll('.server-card');
+  cards.forEach(card=>{
+    const id = card.querySelector('.server-num')?.textContent;
+    const s = SERVERS.find(x=>x.id===id);
+    if (!s || s.status!=='online') return;
+    const bar = card.querySelector('.load-bar');
+    const val = card.querySelector('.load-val');
+    if (bar) { bar.style.width=s.load+'%'; bar.style.background=loadColor(s.load); }
+    if (val) val.textContent=s.load+'% load';
+  });
+}, 3000);
+</script>
+</body>
+</html>
